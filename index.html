@@ -187,9 +187,13 @@
                     <label for="classname">Lớp học phần:</label>
                     <select id="classname" name="classname" required>
                         <option value="" disabled selected>-- Chọn lớp học --</option>
-                        <option value="HTTTKT_Nhom1">Hệ thống thông tin kế toán - Nhóm 1</option>
-                        <option value="HTTTKT_Nhom2">Hệ thống thông tin kế toán - Nhóm 2</option>
-                        <option value="TQHBC_Nhom1">Trực quan hóa báo cáo trong kinh doanh - Nhóm 1</option>
+                        <option value="DHKT20C">DHKT20C</option>
+                        <option value="DHKT20C_TCTA">DHKT20C_TCTA</option>
+                        <option value="DHKT20A">DHKT20A</option>
+                        <option value="DH18TT-HL-N1">DH18TT-HL-N1 - Tiết 1-3</option>
+                        <option value="DH18TT-HL">DH18TT-HL - Tiết 4-6</option>
+                        <option value="DHQTLOG21C">DHQTLOG21C</option>
+                        <option value="DHMK21A">DHMK21A</option>
                     </select>
                 </div>
 
@@ -268,11 +272,11 @@
                         
                         showMessage("Điểm danh thành công!", true);
                         
-                        // Khóa màn hình sau 2 giây
+                        // Khóa màn hình sau 3 giây
                         setTimeout(() => {
                             formContainer.style.display = 'none';
                             lockScreen.style.display = 'flex';
-                        }, 2000);
+                        }, 3000);
                         
                     } else if (data.result === 'duplicate_mssv') {
                         // Trùng MSSV trong Sheet
