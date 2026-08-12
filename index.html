@@ -179,6 +179,7 @@
         <div id="lockScreen">
             <h2>Đã Điểm Danh</h2>
             <p>Thiết bị này đã được sử dụng để điểm danh.<br>Không thể điểm danh lại.</p>
+            <div id="attendanceInfo" style="display:none; margin-top:15px; padding:15px; background-color:#d4edda; color:#155724; border-radius:8px; text-align:left; width:100%;"></div>
         </div>
 
         <div id="formContainer">
@@ -227,6 +228,16 @@
         const submitBtn = document.getElementById('submitBtn');
         const formContainer = document.getElementById('formContainer');
         const lockScreen = document.getElementById('lockScreen');
+        const attendanceInfo = document.getElementById('attendanceInfo');
+
+        // Hiển thị thông tin Lớp / Họ tên / MSSV vừa điểm danh vào màn hình khóa
+        function showAttendanceInfo(className, studentName, mssvValue) {
+            attendanceInfo.innerHTML =
+                '<p><strong>Lớp học phần:</strong> ' + className + '</p>' +
+                '<p><strong>Họ và tên:</strong> ' + studentName + '</p>' +
+                '<p><strong>MSSV:</strong> ' + mssvValue + '</p>';
+            attendanceInfo.style.display = 'block';
+        }
 
         // KIỂM TRA THIẾT BỊ ĐÃ ĐIỂM DANH CHƯA
         // Khóa theo ngày hiện tại để mỗi thiết bị chỉ điểm danh 1 lần/ngày
@@ -236,6 +247,15 @@
         if (hasAttendedToday) {
             formContainer.style.display = 'none';
             lockScreen.style.display = 'flex';
+
+            // Nếu đã lưu thông tin lần điểm danh trước đó trên thiết bị này thì hiển thị lại
+            const savedInfo = localStorage.getItem('attendanceInfo_' + today);
+            if (savedInfo) {
+                try {
+                    const info = JSON.parse(savedInfo);
+                    showAttendanceInfo(info.className, info.studentName, info.mssv);
+                } catch (e) { /* bỏ qua nếu dữ liệu lỗi */ }
+            }
         }
 
         form.addEventListener('submit', e => {
@@ -271,8 +291,25 @@
                     if(data.result === 'success') {
                         // Thành công: Đánh dấu thiết bị đã điểm danh
                         localStorage.setItem('attended_' + today, 'true');
-                        
-                        showMessage("Điểm danh thành công!", true);
+
+                        // Lấy thông tin vừa điểm danh để hiển thị
+                        const classSelect = document.getElementById('classname');
+                        const className = classSelect.options[classSelect.selectedIndex].text;
+                        const studentName = document.getElementById('studentName').value.trim();
+
+                        localStorage.setItem('attendanceInfo_' + today, JSON.stringify({
+                            className: className,
+                            studentName: studentName,
+                            mssv: mssv
+                        }));
+
+                        showMessage(
+                            "Điểm danh thành công!<br>Lớp: " + className +
+                            "<br>Họ tên: " + studentName +
+                            "<br>MSSV: " + mssv,
+                            true
+                        );
+                        showAttendanceInfo(className, studentName, mssv);
                         
                         // Khóa màn hình sau 3 giây
                         setTimeout(() => {
@@ -300,9 +337,9 @@
         });
 
         function showMessage(text, isSuccess) {
-            messageDiv.textContent = text;
+            messageDiv.innerHTML = text;
             messageDiv.style.display = 'block';
-            messageDiv.classname = isSuccess ? 'success' : 'error';
+            messageDiv.className = isSuccess ? 'success' : 'error';
         }
     </script>
 </body>
