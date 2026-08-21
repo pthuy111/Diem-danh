@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
     <title>Hệ Thống Điểm Danh Sinh Viên</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,9 +44,7 @@
             text-align: center;
         }
 
-        .header {
-            margin-bottom: 30px;
-        }
+        .header { margin-bottom: 30px; }
 
         .header h1 {
             color: var(--primary-color);
@@ -57,7 +57,7 @@
             color: #666;
             font-weight: 600;
         }
-        
+
         .header .sub-text {
             font-size: 13px;
             color: #888;
@@ -83,7 +83,7 @@
             padding: 12px 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 16px; /* 16px để iPhone không tự phóng to khi gõ */
             transition: all 0.3s ease;
             background-color: #f9f9f9;
         }
@@ -110,20 +110,9 @@
             margin-top: 10px;
         }
 
-        button:hover {
-            background-color: rgb(25, 49, 117);
-        }
-        
-        button:active {
-            background-color: var(--accent-color);
-            color: var(--primary-color);
-        }
-        
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-            color: #666;
-        }
+        button:hover { background-color: rgb(25, 49, 117); }
+        button:active { background-color: var(--accent-color); color: var(--primary-color); }
+        button:disabled { background-color: #ccc; cursor: not-allowed; color: #666; }
 
         #message {
             margin-top: 20px;
@@ -132,23 +121,13 @@
             padding: 10px;
             border-radius: 6px;
             display: none;
+            text-align: left;
         }
 
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error   { background-color: #f8d7da; color: #721c24; }
+        .loading { opacity: 0.7; pointer-events: none; }
 
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        
-        .loading {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-        
         #lockScreen {
             display: none;
             flex-direction: column;
@@ -156,15 +135,33 @@
             justify-content: center;
             padding: 20px;
         }
-        
-        #lockScreen h2 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
+
+        #lockScreen h2 { color: var(--primary-color); margin-bottom: 10px; }
+
+        #attendanceInfo {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 8px;
+            text-align: left;
+            width: 100%;
         }
-        
-        #formContainer {
-            display: block;
+
+        #alreadyNotice {
+            display: none;
+            margin-bottom: 20px;
+            padding: 12px 15px;
+            background-color: #fff3cd;
+            color: #7a5b00;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: left;
         }
+
+        #formContainer { display: block; }
     </style>
 </head>
 <body>
@@ -177,9 +174,9 @@
         </div>
 
         <div id="lockScreen">
-            <h2>Đã Điểm Danh</h2>
-            <p>Thiết bị này đã được sử dụng để điểm danh.<br>Không thể điểm danh lại.</p>
-            <div id="attendanceInfo" style="display:none; margin-top:15px; padding:15px; background-color:#d4edda; color:#155724; border-radius:8px; text-align:left; width:100%;"></div>
+            <h2>Đã ghi nhận</h2>
+            <p>Thiết bị này đã điểm danh cho lớp học phần bên dưới.</p>
+            <div id="attendanceInfo"></div>
         </div>
 
         <div id="formContainer">
@@ -200,17 +197,22 @@
                     </select>
                 </div>
 
+                <div id="alreadyNotice"></div>
+
                 <div class="form-group">
                     <label for="mssv">Mã số sinh viên:</label>
-                    <input type="text" id="mssv" name="mssv" placeholder="Nhập chính xác để hệ thống ghi nhận" required pattern="[0-9]{8,10}" title="Vui lòng nhập đúng định dạng">
+                    <input type="text" id="mssv" name="mssv" inputmode="numeric"
+                           placeholder="Nhập chính xác để hệ thống ghi nhận"
+                           required pattern="[0-9]{8,10}"
+                           title="Mã số sinh viên gồm 8 đến 10 chữ số">
                 </div>
 
                 <div class="form-group">
                     <label for="studentName">Họ và tên:</label>
-                    <input type="text" id="studentName" name="studentName" placeholder="Nhập đầy đủ họ tên có dấu tiếng Việt" required>
+                    <input type="text" id="studentName" name="studentName"
+                           placeholder="Nhập đầy đủ họ tên có dấu tiếng Việt" required>
                 </div>
-                
-                <!-- Ẩn trạng thái, mặc định luôn gửi là 'Có mặt' -->
+
                 <input type="hidden" name="status" value="Có mặt">
 
                 <button type="submit" id="submitBtn">Ghi nhận điểm danh</button>
@@ -220,127 +222,182 @@
     </div>
 
     <script>
-        // THAY THẾ URL DƯỚI ĐÂY BẰNG WEB APP URL TỪ GOOGLE APPS SCRIPT CỦA BẠN
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwYkLIY1fWiWl4ogO5Z9vLFrBQheKuOFYWnuAW082heG2Fis9porwnBqB6KXI9k8UmiFQ/exec'; 
-        
-        const form = document.getElementById('attendanceForm');
-        const messageDiv = document.getElementById('message');
-        const submitBtn = document.getElementById('submitBtn');
-        const formContainer = document.getElementById('formContainer');
-        const lockScreen = document.getElementById('lockScreen');
-        const attendanceInfo = document.getElementById('attendanceInfo');
+        /* ================== CẤU HÌNH ==================
+           Mỗi lần tạo deployment mới trong Apps Script phải dán URL mới vào đây,
+           rồi tạo lại mã QR với đuôi ?v=2, ?v=3... để trình duyệt sinh viên
+           không dùng lại bản HTML đã lưu trong bộ nhớ đệm.                    */
+        const scriptURL = 'https://docs.google.com/spreadsheets/d/1GCWMU7oBzxZHz_YAh7pZwnINWSID8n1GWHBMToJAVB0/edit?gid=0#gid=0';
 
-        // Hiển thị thông tin Lớp / Họ tên / MSSV vừa điểm danh vào màn hình khóa
-        function showAttendanceInfo(className, studentName, mssvValue) {
+        const form           = document.getElementById('attendanceForm');
+        const messageDiv     = document.getElementById('message');
+        const submitBtn      = document.getElementById('submitBtn');
+        const formContainer  = document.getElementById('formContainer');
+        const lockScreen     = document.getElementById('lockScreen');
+        const attendanceInfo = document.getElementById('attendanceInfo');
+        const alreadyNotice  = document.getElementById('alreadyNotice');
+        const classSelect    = document.getElementById('classname');
+        const mssvInput      = document.getElementById('mssv');
+        const nameInput      = document.getElementById('studentName');
+
+        /* ---- localStorage an toàn: trình duyệt riêng tư hoặc webview trong
+                Zalo/Facebook có thể chặn, khi đó chỉ bỏ qua chứ không làm hỏng trang ---- */
+        const store = {
+            get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+            set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* bỏ qua */ } }
+        };
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, function (c) {
+                return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+            });
+        }
+
+        /* Ngày theo định dạng cố định, không phụ thuộc trình duyệt */
+        function todayKey() {
+            const d = new Date();
+            const p = function (n) { return (n < 10 ? '0' : '') + n; };
+            return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+        }
+
+        /* Khóa theo NGÀY + LỚP HỌC PHẦN, không khóa cả ngày như bản cũ,
+           để sinh viên học 2 lớp trong cùng một ngày vẫn điểm danh được lớp thứ hai. */
+        function lockKey(classValue) {
+            return 'dd_' + todayKey() + '_' + classValue;
+        }
+
+        function showAttendanceInfo(className, studentName, mssvValue, timeText) {
             attendanceInfo.innerHTML =
-                '<p><strong>Lớp học phần:</strong> ' + className + '</p>' +
-                '<p><strong>Họ và tên:</strong> ' + studentName + '</p>' +
-                '<p><strong>MSSV:</strong> ' + mssvValue + '</p>';
+                '<p><strong>Lớp học phần:</strong> ' + escapeHtml(className) + '</p>' +
+                '<p><strong>Họ và tên:</strong> ' + escapeHtml(studentName) + '</p>' +
+                '<p><strong>MSSV:</strong> ' + escapeHtml(mssvValue) + '</p>' +
+                (timeText ? '<p><strong>Thời gian:</strong> ' + escapeHtml(timeText) + '</p>' : '');
             attendanceInfo.style.display = 'block';
         }
-
-        // KIỂM TRA THIẾT BỊ ĐÃ ĐIỂM DANH CHƯA
-        // Khóa theo ngày hiện tại để mỗi thiết bị chỉ điểm danh 1 lần/ngày
-        const today = new Date().toLocaleDateString('vi-VN');
-        const hasAttendedToday = localStorage.getItem('attended_' + today);
-
-        if (hasAttendedToday) {
-            formContainer.style.display = 'none';
-            lockScreen.style.display = 'flex';
-
-            // Nếu đã lưu thông tin lần điểm danh trước đó trên thiết bị này thì hiển thị lại
-            const savedInfo = localStorage.getItem('attendanceInfo_' + today);
-            if (savedInfo) {
-                try {
-                    const info = JSON.parse(savedInfo);
-                    showAttendanceInfo(info.className, info.studentName, info.mssv);
-                } catch (e) { /* bỏ qua nếu dữ liệu lỗi */ }
-            }
-        }
-
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-            
-            if(scriptURL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
-                showMessage("Lỗi: Bạn chưa cấu hình đường dẫn Google Apps Script (URL).", false);
-                return;
-            }
-
-            // Client-side format check (optional backup)
-            const mssv = document.getElementById('mssv').value.trim();
-            if(mssv.length < 8) {
-                showMessage("Mã số sinh viên không hợp lệ.", false);
-                return;
-            }
-
-            submitBtn.classList.add('loading');
-            submitBtn.textContent = 'Đang xử lý...';
-            submitBtn.disabled = true;
-            
-            const formData = new FormData(form);
-            // Gửi kèm tham số action = 'attendance'
-            formData.append('action', 'attendance');
-            
-            // Lấy timestamp từ client
-            const timestamp = new Date().toLocaleString('vi-VN');
-            formData.append('timestamp', timestamp);
-
-            fetch(scriptURL, { method: 'POST', body: formData})
-                .then(response => response.json())
-                .then(data => {
-                    if(data.result === 'success') {
-                        // Thành công: Đánh dấu thiết bị đã điểm danh
-                        localStorage.setItem('attended_' + today, 'true');
-
-                        // Lấy thông tin vừa điểm danh để hiển thị
-                        const classSelect = document.getElementById('classname');
-                        const className = classSelect.options[classSelect.selectedIndex].text;
-                        const studentName = document.getElementById('studentName').value.trim();
-
-                        localStorage.setItem('attendanceInfo_' + today, JSON.stringify({
-                            className: className,
-                            studentName: studentName,
-                            mssv: mssv
-                        }));
-
-                        showMessage(
-                            "Điểm danh thành công!<br>Lớp: " + className +
-                            "<br>Họ tên: " + studentName +
-                            "<br>MSSV: " + mssv,
-                            true
-                        );
-                        showAttendanceInfo(className, studentName, mssv);
-                        
-                        // Khóa màn hình sau 3 giây
-                        setTimeout(() => {
-                            formContainer.style.display = 'none';
-                            lockScreen.style.display = 'flex';
-                        }, 3000);
-                        
-                    } else if (data.result === 'duplicate_mssv') {
-                        // Trùng MSSV trong Sheet
-                        showMessage("Lỗi: Mã số sinh viên này đã được điểm danh trước đó!", false);
-                        submitBtn.classList.remove('loading');
-                        submitBtn.textContent = 'Ghi nhận điểm danh';
-                        submitBtn.disabled = false;
-                    } else {
-                        throw new Error(data.error || "Unknown error");
-                    }
-                })
-                .catch(error => {
-                    console.error('Error!', error.message);
-                    showMessage("Có lỗi xảy ra kết nối hệ thống, vui lòng thử lại.", false);
-                    submitBtn.classList.remove('loading');
-                    submitBtn.textContent = 'Ghi nhận điểm danh';
-                    submitBtn.disabled = false;
-                });
-        });
 
         function showMessage(text, isSuccess) {
             messageDiv.innerHTML = text;
             messageDiv.style.display = 'block';
             messageDiv.className = isSuccess ? 'success' : 'error';
         }
+
+        function resetButton() {
+            submitBtn.classList.remove('loading');
+            submitBtn.textContent = 'Ghi nhận điểm danh';
+            submitBtn.disabled = false;
+        }
+
+        /* Khi đổi lớp, kiểm tra xem thiết bị đã điểm danh lớp đó hôm nay chưa */
+        function checkSelectedClass() {
+            const value = classSelect.value;
+            if (!value) {
+                alreadyNotice.style.display = 'none';
+                resetButton();
+                return;
+            }
+            const saved = store.get(lockKey(value));
+            if (saved) {
+                let info = null;
+                try { info = JSON.parse(saved); } catch (e) { info = null; }
+                alreadyNotice.innerHTML = 'Thiết bị này đã điểm danh lớp ' +
+                    escapeHtml(classSelect.options[classSelect.selectedIndex].text) +
+                    ' hôm nay' + (info && info.mssv ? ' với MSSV ' + escapeHtml(info.mssv) : '') +
+                    '. Chọn lớp học phần khác nếu bạn có buổi học khác.';
+                alreadyNotice.style.display = 'block';
+                submitBtn.disabled = true;
+            } else {
+                alreadyNotice.style.display = 'none';
+                resetButton();
+            }
+        }
+        classSelect.addEventListener('change', checkSelectedClass);
+        checkSelectedClass();
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            /* Làm sạch dữ liệu NGAY TRÊN Ô NHẬP, để FormData gửi đi bản đã cắt khoảng trắng.
+               Bản cũ chỉ trim biến trung gian nên khoảng trắng thừa vẫn lọt vào Sheet. */
+            mssvInput.value = mssvInput.value.replace(/\s/g, '');
+            nameInput.value = nameInput.value.trim().replace(/\s+/g, ' ');
+
+            const mssv        = mssvInput.value;
+            const studentName = nameInput.value;
+            const classValue  = classSelect.value;
+            const className   = classSelect.options[classSelect.selectedIndex].text;
+
+            if (!classValue) { showMessage('Vui lòng chọn lớp học phần.', false); return; }
+            if (!/^[0-9]{8,10}$/.test(mssv)) {
+                showMessage('Mã số sinh viên phải gồm 8 đến 10 chữ số.', false);
+                return;
+            }
+            if (studentName.length < 3) {
+                showMessage('Vui lòng nhập đầy đủ họ và tên.', false);
+                return;
+            }
+
+            submitBtn.classList.add('loading');
+            submitBtn.textContent = 'Đang xử lý...';
+            submitBtn.disabled = true;
+            messageDiv.style.display = 'none';
+
+            const formData = new FormData(form);
+            formData.append('action', 'attendance');
+
+            /* Giới hạn thời gian chờ: mạng yếu sẽ báo lỗi rõ ràng thay vì treo mãi */
+            const controller = new AbortController();
+            const timer = setTimeout(function () { controller.abort(); }, 25000);
+
+            fetch(scriptURL, { method: 'POST', body: formData, signal: controller.signal })
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    clearTimeout(timer);
+
+                    if (data.result === 'success') {
+                        /* Lưu khóa theo lớp. Nếu trình duyệt chặn lưu trữ thì bỏ qua,
+                           không được để lỗi này rơi vào catch và báo sai là thất bại. */
+                        store.set(lockKey(classValue), JSON.stringify({
+                            className: className,
+                            studentName: studentName,
+                            mssv: mssv,
+                            time: data.time || ''
+                        }));
+
+                        showMessage(
+                            'Điểm danh thành công.<br>Lớp: ' + escapeHtml(className) +
+                            '<br>Họ tên: ' + escapeHtml(studentName) +
+                            '<br>MSSV: ' + escapeHtml(mssv) +
+                            (data.time ? '<br>Thời gian máy chủ: ' + escapeHtml(data.time) : '') +
+                            (data.row ? '<br>Dòng ghi nhận: ' + escapeHtml(data.row) : ''),
+                            true
+                        );
+                        showAttendanceInfo(className, studentName, mssv, data.time);
+
+                        setTimeout(function () {
+                            formContainer.style.display = 'none';
+                            lockScreen.style.display = 'flex';
+                        }, 3000);
+
+                    } else if (data.result === 'duplicate_mssv') {
+                        showMessage('Mã số sinh viên này đã điểm danh lớp ' +
+                                    escapeHtml(className) + ' hôm nay.', false);
+                        resetButton();
+
+                    } else {
+                        showMessage('Máy chủ báo lỗi: ' +
+                                    escapeHtml(data.error || 'không xác định') +
+                                    '. Vui lòng báo giảng viên.', false);
+                        resetButton();
+                    }
+                })
+                .catch(function (error) {
+                    clearTimeout(timer);
+                    console.error('Error!', error);
+                    showMessage(error.name === 'AbortError'
+                        ? 'Mạng phản hồi quá chậm. Kiểm tra kết nối và bấm lại.'
+                        : 'Không kết nối được hệ thống. Kiểm tra mạng và bấm lại.', false);
+                    resetButton();
+                });
+        });
     </script>
 </body>
 </html>
