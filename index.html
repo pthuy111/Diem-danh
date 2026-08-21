@@ -131,6 +131,13 @@
             text-align: left;
         }
 
+        #siteBadge {
+            margin: -14px 0 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+        }
+
         #geoStatus { font-size: 13px; color: #888; margin-top: 12px; }
     </style>
 </head>
@@ -148,7 +155,7 @@
             <div class="icon">📷</div>
             <h2>Cần quét mã QR tại lớp</h2>
             <p>Trang này chỉ hoạt động khi bạn quét mã QR đang hiển thị trên màn hình lớp học.
-               Mã đổi mới liên tục nên đường link cũ không còn giá trị.</p>
+               Mã đổi mới liên tục và gắn với từng cơ sở, nên đường link cũ không còn giá trị.</p>
         </div>
 
         <!-- Màn hình đã điểm danh -->
@@ -162,10 +169,12 @@
         <!-- Biểu mẫu -->
         <div id="formScreen" class="screen">
             <div class="class-badge" id="classBadge"></div>
+            <div id="siteBadge"></div>
 
             <form id="attendanceForm">
                 <input type="hidden" id="classname" name="classname">
                 <input type="hidden" id="token" name="token">
+                <input type="hidden" id="site" name="site">
                 <input type="hidden" name="status" value="Có mặt">
 
                 <div class="form-group">
@@ -193,7 +202,7 @@
     <script>
         /* ================== CẤU HÌNH ==================
            Dán Web app URL của Google Apps Script vào đây.                    */
-        const scriptURL = 'https://script.google.com/macros/s/AKfycby8KUxR1D8Xb2qKxNZUp4t4mMhsIzMZMF4v9CI35DWebP2-zk0c7GEgIaeXnLFOqorOaA/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzURX2OatlYdikc95tVCBxkJ80g7Q6Hy8r3j8XrZN4Zbct93262k_Few5VP71_bDbi9/exec';
 
         /* Nhãn hiển thị cho từng mã lớp. Phải khớp với danh sách CLASSES
            trong Apps Script. */
@@ -209,6 +218,13 @@
             'DHDIGITAL21C_TCTA':  'DHDIGITAL21C_TCTA'
         };
 
+        /* Nhãn hiển thị cho từng mã cơ sở. Phải khớp với CAMPUSES trong Apps Script. */
+        const SITE_LABELS = {
+            'NVB':  'Cơ sở Nguyễn Văn Bảo (Gò Vấp)',
+            'NVD':  'Cơ sở Nguyễn Văn Dung',
+            'AUTO': 'Cơ sở gần nhất'
+        };
+
         /* Bắt buộc phải chia sẻ vị trí mới cho gửi.
            Đặt false nếu Apps Script đang để GEO_MODE = 'off'. */
         const REQUIRE_LOCATION = true;
@@ -222,6 +238,8 @@
         const classInput  = document.getElementById('classname');
         const tokenInput  = document.getElementById('token');
         const classBadge  = document.getElementById('classBadge');
+        const siteBadge   = document.getElementById('siteBadge');
+        const siteInput   = document.getElementById('site');
         const attendanceInfo = document.getElementById('attendanceInfo');
 
         const store = {
@@ -262,6 +280,7 @@
         function showAttendanceInfo(info) {
             attendanceInfo.innerHTML =
                 '<p><strong>Lớp học phần:</strong> ' + escapeHtml(info.className) + '</p>' +
+                (info.siteName ? '<p><strong>Cơ sở:</strong> ' + escapeHtml(info.siteName) + '</p>' : '') +
                 '<p><strong>Họ và tên:</strong> ' + escapeHtml(info.studentName) + '</p>' +
                 '<p><strong>MSSV:</strong> ' + escapeHtml(info.mssv) + '</p>' +
                 (info.time ? '<p><strong>Thời gian:</strong> ' + escapeHtml(info.time) + '</p>' : '');
@@ -271,10 +290,12 @@
         /* ---------- Đọc mã QR từ đường dẫn ---------- */
         const params    = new URLSearchParams(window.location.search);
         const classCode = (params.get('c') || '').trim();
+        const siteCode  = (params.get('s') || '').trim();
         const token     = (params.get('t') || '').trim();
         const className = CLASS_LABELS[classCode] || classCode;
+        const siteName  = SITE_LABELS[siteCode] || siteCode;
 
-        if (!classCode || !token || !CLASS_LABELS[classCode]) {
+        if (!classCode || !token || !siteCode || !CLASS_LABELS[classCode]) {
             showScreen('gateScreen');
         } else {
             const saved = store.get(lockKey(classCode));
@@ -286,7 +307,9 @@
             } else {
                 classInput.value = classCode;
                 tokenInput.value = token;
+                siteInput.value  = siteCode;
                 classBadge.textContent = className;
+                siteBadge.textContent  = siteName;
                 showScreen('formScreen');
                 warmUpLocation();
             }
@@ -380,6 +403,7 @@
                     if (data.result === 'success') {
                         const info = {
                             className: className,
+                            siteName: siteName,
                             studentName: studentName,
                             mssv: mssv,
                             time: data.time || ''
@@ -401,8 +425,10 @@
                         resetButton();
 
                     } else if (data.result === 'out_of_range') {
-                        showMessage('Vị trí của bạn cách phòng học khoảng ' +
-                                    escapeHtml(data.distance) + 'm nên không được ghi nhận.', 'error');
+                        showMessage('Vị trí của bạn cách ' +
+                                    escapeHtml(data.campus || 'phòng học') + ' khoảng ' +
+                                    escapeHtml(data.distance) + 'm nên không được ghi nhận. ' +
+                                    'Nếu bạn đang ngồi trong lớp, hãy ra gần cửa sổ và bấm lại.', 'error');
                         resetButton();
 
                     } else if (data.result === 'geo_required') {
