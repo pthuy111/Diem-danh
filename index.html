@@ -434,7 +434,9 @@
                     } else if (data.result === 'geo_required') {
                         showMessage('Không nhận được vị trí. Vui lòng bật định vị rồi bấm lại.', 'error');
                         resetButton();
-
+                    } else if (data.result === 'closed') {
+                        showMessage('Đã hết thời gian điểm danh cho buổi học này.', 'warn');
+                        resetButton();
                     } else if (data.result === 'duplicate_mssv') {
                         showMessage('Mã số sinh viên này đã điểm danh lớp ' +
                                     escapeHtml(className) + ' hôm nay.', 'error');
