@@ -130,13 +130,14 @@
         function refresh() {
             const cls  = clsSelect.value;
             const site = siteSelect.value;
-            const url = scriptURL +
-                '?page=qrdata' +
-                '&key=' + encodeURIComponent(ADMIN_KEY) +
-                '&c=' + encodeURIComponent(cls) +
-                '&s=' + encodeURIComponent(site);
 
-            fetch(url)
+            const formData = new FormData();
+            formData.append('action', 'qrdata');
+            formData.append('key', ADMIN_KEY);
+            formData.append('c', cls);
+            formData.append('s', site);
+
+            fetch(scriptURL, { method: 'POST', body: formData })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     if (data.result === 'ok') {
