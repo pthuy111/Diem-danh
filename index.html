@@ -186,7 +186,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="studentName">Họ và tên:</label>
+                    <label for="studentName">Họ tên:</label>
                     <input type="text" id="studentName" name="studentName"
                            placeholder="Nhập đầy đủ họ tên có dấu tiếng Việt" required>
                 </div>
@@ -199,6 +199,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
     <script>
         /* ================== CẤU HÌNH ==================
            Dán Web app URL của Google Apps Script vào đây.                    */
@@ -246,6 +247,14 @@
             get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
             set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
         };
+
+        // Dấu vân tay thiết bị — dựa vào đặc điểm phần cứng/phần mềm, KHÔNG lưu
+        // trong localStorage nên xóa lịch sử/dữ liệu duyệt web không xóa được nó.
+        // Server sẽ dùng giá trị này để chặn 1 thiết bị điểm danh hộ nhiều MSSV.
+        const visitorIdPromise = FingerprintJS.load()
+            .then(function (fp) { return fp.get(); })
+            .then(function (result) { return result.visitorId; })
+            .catch(function () { return ''; });
 
         function escapeHtml(s) {
             return String(s).replace(/[&<>"']/g, function (c) {
@@ -374,6 +383,13 @@
             messageDiv.style.display = 'none';
 
             getPosition().then(function (pos) {
+                return visitorIdPromise.then(function (deviceId) {
+                    return { pos: pos, deviceId: deviceId };
+                });
+            }).then(function (result) {
+                const pos = result.pos;
+                const deviceId = result.deviceId;
+
                 if (!pos && REQUIRE_LOCATION) {
                     showMessage('Cần bật định vị để điểm danh. Vào Cài đặt trình duyệt, ' +
                                 'cho phép truy cập vị trí rồi bấm lại.', 'error');
@@ -389,6 +405,7 @@
                     formData.append('lng', pos.coords.longitude);
                     formData.append('acc', pos.coords.accuracy);
                 }
+                formData.append('deviceId', deviceId || '');
 
                 const controller = new AbortController();
                 const timer = setTimeout(function () { controller.abort(); }, 25000);
@@ -440,6 +457,11 @@
                     } else if (data.result === 'duplicate_mssv') {
                         showMessage('Mã số sinh viên này đã điểm danh lớp ' +
                                     escapeHtml(className) + ' hôm nay.', 'error');
+                        resetButton();
+
+                    } else if (data.result === 'duplicate_device') {
+                        showMessage('Thiết bị này đã được dùng để điểm danh cho một bạn khác ' +
+                                    'trong lớp ' + escapeHtml(className) + ' hôm nay.', 'error');
                         resetButton();
 
                     } else {
