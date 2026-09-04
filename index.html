@@ -202,7 +202,7 @@
     <script>
         /* ================== CẤU HÌNH ==================
            Dán Web app URL của Google Apps Script vào đây.                    */
-        const scriptURL = 'DÁN_WEB_APP_URL_CỦA_APPS_SCRIPT_VÀO_ĐÂY';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzURX2OatlYdikc95tVCBxkJ80g7Q6Hy8r3j8XrZN4Zbct93262k_Few5VP71_bDbi9/exec';
 
         /* Nhãn hiển thị cho từng mã lớp. Phải khớp với danh sách CLASSES
            trong Apps Script. */
@@ -220,7 +220,7 @@
 
         /* Nhãn hiển thị cho từng mã cơ sở. Phải khớp với CAMPUSES trong Apps Script. */
         const SITE_LABELS = {
-            'NVB':  'Cơ sở Nguyễn Văn Bảo (Gò Vấp)',
+            'NVB':  'Cơ sở Nguyễn Văn Bảo',
             'NVD':  'Cơ sở Nguyễn Văn Dung',
             'AUTO': 'Cơ sở gần nhất'
         };
@@ -434,7 +434,9 @@
                     } else if (data.result === 'geo_required') {
                         showMessage('Không nhận được vị trí. Vui lòng bật định vị rồi bấm lại.', 'error');
                         resetButton();
-
+                    } else if (data.result === 'closed') {
+                        showMessage('Đã hết thời gian điểm danh cho buổi học này.', 'warn');
+                        resetButton();
                     } else if (data.result === 'duplicate_mssv') {
                         showMessage('Mã số sinh viên này đã điểm danh lớp ' +
                                     escapeHtml(className) + ' hôm nay.', 'error');
