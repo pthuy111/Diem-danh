@@ -3,24 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
     <title>Hệ Thống Điểm Danh Sinh Viên</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: rgb(33, 64, 154); /* Xanh IUH */
-            --accent-color: rgb(253, 185, 36);  /* Vàng/Cam */
+            --primary-color: rgb(33, 64, 154);
+            --accent-color: rgb(253, 185, 36);
             --bg-color: #f4f7f6;
             --text-color: #333;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Nunito', sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Nunito', sans-serif; }
 
         body {
             background-color: var(--bg-color);
@@ -33,7 +30,7 @@
         }
 
         .container {
-            background-color: #ffffff;
+            background-color: #fff;
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
             width: 100%;
@@ -42,32 +39,23 @@
             text-align: center;
         }
 
-        .header {
-            margin-bottom: 30px;
+        .header { margin-bottom: 26px; }
+        .header h1 { color: var(--primary-color); font-size: 24px; margin-bottom: 8px; }
+        .header p { font-size: 14px; color: #666; font-weight: 600; }
+        .header .sub-text { font-size: 13px; color: #888; margin-top: 4px; }
+
+        .class-badge {
+            display: inline-block;
+            margin: 0 0 22px;
+            padding: 10px 18px;
+            background: var(--primary-color);
+            color: #fff;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 15px;
         }
 
-        .header h1 {
-            color: var(--primary-color);
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
-
-        .header p {
-            font-size: 14px;
-            color: #666;
-            font-weight: 600;
-        }
-        
-        .header .sub-text {
-            font-size: 13px;
-            color: #888;
-            margin-top: 4px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
+        .form-group { margin-bottom: 20px; text-align: left; }
 
         label {
             display: block;
@@ -77,19 +65,17 @@
             font-size: 15px;
         }
 
-        input[type="text"],
-        select {
+        input[type="text"] {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 16px;
             transition: all 0.3s ease;
             background-color: #f9f9f9;
         }
 
-        input[type="text"]:focus,
-        select:focus {
+        input[type="text"]:focus {
             border-color: var(--primary-color);
             outline: none;
             background-color: #fff;
@@ -110,61 +96,49 @@
             margin-top: 10px;
         }
 
-        button:hover {
-            background-color: rgb(25, 49, 117);
-        }
-        
-        button:active {
-            background-color: var(--accent-color);
-            color: var(--primary-color);
-        }
-        
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-            color: #666;
-        }
+        button:hover { background-color: rgb(25, 49, 117); }
+        button:active { background-color: var(--accent-color); color: var(--primary-color); }
+        button:disabled { background-color: #ccc; cursor: not-allowed; color: #666; }
 
         #message {
             margin-top: 20px;
             font-weight: 600;
             font-size: 14px;
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             display: none;
+            text-align: left;
         }
 
-        .success {
+        .success { background-color: #d4edda; color: #155724; }
+        .error   { background-color: #f8d7da; color: #721c24; }
+        .warn    { background-color: #fff3cd; color: #7a5b00; }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        #gateScreen .icon, #lockScreen .icon { font-size: 46px; margin-bottom: 12px; }
+        #gateScreen h2, #lockScreen h2 { color: var(--primary-color); margin-bottom: 10px; font-size: 20px; }
+        #gateScreen p, #lockScreen p { color: #555; font-size: 15px; line-height: 1.6; }
+
+        #attendanceInfo {
+            display: none;
+            margin-top: 16px;
+            padding: 15px;
             background-color: #d4edda;
             color: #155724;
+            border-radius: 8px;
+            text-align: left;
         }
 
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
+        #siteBadge {
+            margin: -14px 0 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
         }
-        
-        .loading {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-        
-        #lockScreen {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        #lockScreen h2 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-        
-        #formContainer {
-            display: block;
-        }
+
+        #geoStatus { font-size: 13px; color: #888; margin-top: 12px; }
     </style>
 </head>
 <body>
@@ -176,190 +150,312 @@
             <p class="sub-text">Viện Tài chính - Kế toán<br>Trường Đại học Công nghiệp TP.HCM</p>
         </div>
 
-        <div id="lockScreen">
-            <h2>Đã Điểm Danh</h2>
-            <p>Thiết bị này đã được sử dụng để điểm danh.<br>Không thể điểm danh lại.</p>
-            <div id="attendanceInfo" style="display:none; margin-top:15px; padding:15px; background-color:#d4edda; color:#155724; border-radius:8px; text-align:left; width:100%;"></div>
+        <!-- Màn hình chặn: mở link không kèm mã QR -->
+        <div id="gateScreen" class="screen">
+            <div class="icon">📷</div>
+            <h2>Cần quét mã QR tại lớp</h2>
+            <p>Trang này chỉ hoạt động khi bạn quét mã QR đang hiển thị trên màn hình lớp học.
+               Mã đổi mới liên tục và gắn với từng cơ sở, nên đường link cũ không còn giá trị.</p>
         </div>
 
-        <div id="formContainer">
+        <!-- Màn hình đã điểm danh -->
+        <div id="lockScreen" class="screen">
+            <div class="icon">✅</div>
+            <h2>Đã ghi nhận</h2>
+            <p>Thiết bị này đã điểm danh cho lớp học phần bên dưới.</p>
+            <div id="attendanceInfo"></div>
+        </div>
+
+        <!-- Biểu mẫu -->
+        <div id="formScreen" class="screen">
+            <div class="class-badge" id="classBadge"></div>
+            <div id="siteBadge"></div>
+
             <form id="attendanceForm">
-                <div class="form-group">
-                    <label for="classname">Lớp học phần:</label>
-                    <select id="classname" name="classname" required>
-                        <option value="" disabled selected>-- Chọn lớp học --</option>
-                        <option value="DHKT20C">DHKT20C</option>
-                        <option value="DHKT20C_TCTA">DHKT20C_TCTA</option>
-                        <option value="DHKT20A">DHKT20A</option>
-                        <option value="DH18TT_HL_N1">DH18TT_HL_N1 - Tiết 1-3</option>
-                        <option value="DH18TT_HL">DH18TT_HL - Tiết 4-6</option>
-                        <option value="DHQTLOG21C">DHQTLOG21C</option>
-                        <option value="DHMK21A">DHMK21A</option>
-                        <option value="DHDIGITAL21A_TCTA">DHDIGITAL21A_TCTA</option>
-                        <option value="DHDIGITAL21C_TCTA">DHDIGITAL21C_TCTA</option>
-                    </select>
-                </div>
+                <input type="hidden" id="classname" name="classname">
+                <input type="hidden" id="token" name="token">
+                <input type="hidden" id="site" name="site">
+                <input type="hidden" name="status" value="Có mặt">
 
                 <div class="form-group">
                     <label for="mssv">Mã số sinh viên:</label>
-                    <input type="text" id="mssv" name="mssv" placeholder="Nhập chính xác để hệ thống ghi nhận" required pattern="[0-9]{8,10}" title="Vui lòng nhập đúng định dạng">
+                    <input type="text" id="mssv" name="mssv" inputmode="numeric"
+                           placeholder="Nhập chính xác để hệ thống ghi nhận"
+                           required pattern="[0-9]{8,10}"
+                           title="Mã số sinh viên gồm 8 đến 10 chữ số">
                 </div>
 
                 <div class="form-group">
                     <label for="studentName">Họ và tên:</label>
-                    <input type="text" id="studentName" name="studentName" placeholder="Nhập đầy đủ họ tên có dấu tiếng Việt" required>
+                    <input type="text" id="studentName" name="studentName"
+                           placeholder="Nhập đầy đủ họ tên có dấu tiếng Việt" required>
                 </div>
-                
-                <!-- Ẩn trạng thái, mặc định luôn gửi là 'Có mặt' -->
-                <input type="hidden" name="status" value="Có mặt">
 
                 <button type="submit" id="submitBtn">Ghi nhận điểm danh</button>
             </form>
+
             <div id="message"></div>
+            <div id="geoStatus"></div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
     <script>
-        // THAY THẾ URL DƯỚI ĐÂY BẰNG WEB APP URL TỪ GOOGLE APPS SCRIPT CỦA BẠN
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwYkLIY1fWiWl4ogO5Z9vLFrBQheKuOFYWnuAW082heG2Fis9porwnBqB6KXI9k8UmiFQ/exec'; 
-        
-        const form = document.getElementById('attendanceForm');
-        const messageDiv = document.getElementById('message');
-        const submitBtn = document.getElementById('submitBtn');
-        const formContainer = document.getElementById('formContainer');
-        const lockScreen = document.getElementById('lockScreen');
+        /* ================== CẤU HÌNH ==================
+           Dán Web app URL của Google Apps Script vào đây.                    */
+        const scriptURL = 'DÁN_WEB_APP_URL_CỦA_APPS_SCRIPT_VÀO_ĐÂY';
+
+        /* Nhãn hiển thị cho từng mã lớp. Phải khớp với danh sách CLASSES
+           trong Apps Script. */
+        const CLASS_LABELS = {
+            'DHKT20C':            'DHKT20C',
+            'DHKT20C_TCTA':       'DHKT20C_TCTA',
+            'DHKT20A':            'DHKT20A',
+            'DH18TT_HL_N1':       'DH18TT_HL_N1 - Tiết 1-3',
+            'DH18TT_HL':          'DH18TT_HL - Tiết 4-6',
+            'DHQTLOG21C':         'DHQTLOG21C',
+            'DHMK21A':            'DHMK21A',
+            'DHDIGITAL21A_TCTA':  'DHDIGITAL21A_TCTA',
+            'DHDIGITAL21C_TCTA':  'DHDIGITAL21C_TCTA'
+        };
+
+        /* Nhãn hiển thị cho từng mã cơ sở. Phải khớp với CAMPUSES trong Apps Script. */
+        const SITE_LABELS = {
+            'NVB':  'Cơ sở Nguyễn Văn Bảo (Gò Vấp)',
+            'NVD':  'Cơ sở Nguyễn Văn Dung',
+            'AUTO': 'Cơ sở gần nhất'
+        };
+
+        /* Bắt buộc phải chia sẻ vị trí mới cho gửi.
+           Đặt false nếu Apps Script đang để GEO_MODE = 'off'. */
+        const REQUIRE_LOCATION = true;
+
+        const form        = document.getElementById('attendanceForm');
+        const messageDiv  = document.getElementById('message');
+        const submitBtn   = document.getElementById('submitBtn');
+        const geoStatus   = document.getElementById('geoStatus');
+        const mssvInput   = document.getElementById('mssv');
+        const nameInput   = document.getElementById('studentName');
+        const classInput  = document.getElementById('classname');
+        const tokenInput  = document.getElementById('token');
+        const classBadge  = document.getElementById('classBadge');
+        const siteBadge   = document.getElementById('siteBadge');
+        const siteInput   = document.getElementById('site');
         const attendanceInfo = document.getElementById('attendanceInfo');
 
-        // Tính "dấu vân tay thiết bị" ngay khi tải trang — dựa vào đặc điểm
-        // phần cứng/phần mềm của máy/trình duyệt, KHÔNG lưu trong localStorage
-        // nên xóa lịch sử/dữ liệu duyệt web không xóa được nó.
-        const visitorIdPromise = FingerprintJS.load()
-            .then(fp => fp.get())
-            .then(result => result.visitorId)
-            .catch(() => ''); // nếu lỗi, gửi rỗng, server vẫn xử lý được
+        const store = {
+            get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+            set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+        };
 
-        // Hiển thị thông tin Lớp / Họ tên / MSSV vừa điểm danh vào màn hình khóa
-        function showAttendanceInfo(className, studentName, mssvValue) {
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, function (c) {
+                return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+            });
+        }
+
+        function showScreen(id) {
+            ['gateScreen', 'lockScreen', 'formScreen'].forEach(function (s) {
+                document.getElementById(s).classList.toggle('active', s === id);
+            });
+        }
+
+        function showMessage(text, type) {
+            messageDiv.innerHTML = text;
+            messageDiv.style.display = 'block';
+            messageDiv.className = type;
+        }
+
+        function resetButton() {
+            submitBtn.textContent = 'Ghi nhận điểm danh';
+            submitBtn.disabled = false;
+        }
+
+        function todayKey() {
+            const d = new Date();
+            const p = function (n) { return (n < 10 ? '0' : '') + n; };
+            return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+        }
+        function lockKey(cls) { return 'dd_' + todayKey() + '_' + cls; }
+
+        function showAttendanceInfo(info) {
             attendanceInfo.innerHTML =
-                '<p><strong>Lớp học phần:</strong> ' + className + '</p>' +
-                '<p><strong>Họ và tên:</strong> ' + studentName + '</p>' +
-                '<p><strong>MSSV:</strong> ' + mssvValue + '</p>';
+                '<p><strong>Lớp học phần:</strong> ' + escapeHtml(info.className) + '</p>' +
+                (info.siteName ? '<p><strong>Cơ sở:</strong> ' + escapeHtml(info.siteName) + '</p>' : '') +
+                '<p><strong>Họ và tên:</strong> ' + escapeHtml(info.studentName) + '</p>' +
+                '<p><strong>MSSV:</strong> ' + escapeHtml(info.mssv) + '</p>' +
+                (info.time ? '<p><strong>Thời gian:</strong> ' + escapeHtml(info.time) + '</p>' : '');
             attendanceInfo.style.display = 'block';
         }
 
-        // KIỂM TRA THIẾT BỊ ĐÃ ĐIỂM DANH CHƯA
-        // Khóa theo ngày hiện tại để mỗi thiết bị chỉ điểm danh 1 lần/ngày
-        const today = new Date().toLocaleDateString('vi-VN');
-        const hasAttendedToday = localStorage.getItem('attended_' + today);
+        /* ---------- Đọc mã QR từ đường dẫn ---------- */
+        const params    = new URLSearchParams(window.location.search);
+        const classCode = (params.get('c') || '').trim();
+        const siteCode  = (params.get('s') || '').trim();
+        const token     = (params.get('t') || '').trim();
+        const className = CLASS_LABELS[classCode] || classCode;
+        const siteName  = SITE_LABELS[siteCode] || siteCode;
 
-        if (hasAttendedToday) {
-            formContainer.style.display = 'none';
-            lockScreen.style.display = 'flex';
-
-            // Nếu đã lưu thông tin lần điểm danh trước đó trên thiết bị này thì hiển thị lại
-            const savedInfo = localStorage.getItem('attendanceInfo_' + today);
-            if (savedInfo) {
-                try {
-                    const info = JSON.parse(savedInfo);
-                    showAttendanceInfo(info.className, info.studentName, info.mssv);
-                } catch (e) { /* bỏ qua nếu dữ liệu lỗi */ }
+        if (!classCode || !token || !siteCode || !CLASS_LABELS[classCode]) {
+            showScreen('gateScreen');
+        } else {
+            const saved = store.get(lockKey(classCode));
+            if (saved) {
+                let info = null;
+                try { info = JSON.parse(saved); } catch (e) {}
+                showScreen('lockScreen');
+                if (info) showAttendanceInfo(info);
+            } else {
+                classInput.value = classCode;
+                tokenInput.value = token;
+                siteInput.value  = siteCode;
+                classBadge.textContent = className;
+                siteBadge.textContent  = siteName;
+                showScreen('formScreen');
+                warmUpLocation();
             }
         }
 
-        form.addEventListener('submit', async e => {
+        /* ---------- Vị trí ---------- */
+        let lastPosition = null;
+
+        function warmUpLocation() {
+            if (!navigator.geolocation) {
+                geoStatus.textContent = 'Thiết bị không hỗ trợ định vị.';
+                return;
+            }
+            geoStatus.textContent = 'Đang xác định vị trí...';
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    lastPosition = pos;
+                    geoStatus.textContent = 'Đã xác định vị trí (sai số khoảng ' +
+                        Math.round(pos.coords.accuracy) + 'm).';
+                },
+                function () {
+                    geoStatus.textContent = REQUIRE_LOCATION
+                        ? 'Chưa có quyền truy cập vị trí. Vui lòng bấm Cho phép khi trình duyệt hỏi.'
+                        : 'Không lấy được vị trí.';
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+            );
+        }
+
+        function getPosition() {
+            return new Promise(function (resolve) {
+                if (!navigator.geolocation) return resolve(null);
+                navigator.geolocation.getCurrentPosition(
+                    function (pos) { lastPosition = pos; resolve(pos); },
+                    function () { resolve(lastPosition); },
+                    { enableHighAccuracy: true, timeout: 12000, maximumAge: 20000 }
+                );
+            });
+        }
+
+        /* ---------- Gửi dữ liệu ---------- */
+        form.addEventListener('submit', function (e) {
             e.preventDefault();
-            
-            if(scriptURL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
-                showMessage("Lỗi: Bạn chưa cấu hình đường dẫn Google Apps Script (URL).", false);
+
+            mssvInput.value = mssvInput.value.replace(/\s/g, '');
+            nameInput.value = nameInput.value.trim().replace(/\s+/g, ' ');
+
+            const mssv        = mssvInput.value;
+            const studentName = nameInput.value;
+
+            if (!/^[0-9]{8,10}$/.test(mssv)) {
+                showMessage('Mã số sinh viên phải gồm 8 đến 10 chữ số.', 'error');
+                return;
+            }
+            if (studentName.length < 3) {
+                showMessage('Vui lòng nhập đầy đủ họ và tên.', 'error');
                 return;
             }
 
-            // Client-side format check (optional backup)
-            const mssv = document.getElementById('mssv').value.trim();
-            if(mssv.length < 8) {
-                showMessage("Mã số sinh viên không hợp lệ.", false);
-                return;
-            }
-
-            submitBtn.classList.add('loading');
-            submitBtn.textContent = 'Đang xử lý...';
+            submitBtn.textContent = 'Đang xác định vị trí...';
             submitBtn.disabled = true;
-            
-            const formData = new FormData(form);
-            // Gửi kèm tham số action = 'attendance'
-            formData.append('action', 'attendance');
+            messageDiv.style.display = 'none';
 
-            // Gửi kèm dấu vân tay thiết bị để server đối chiếu chống điểm danh hộ
-            const deviceId = await visitorIdPromise;
-            formData.append('deviceId', deviceId);
-            
-            // Lấy timestamp từ client
-            const timestamp = new Date().toLocaleString('vi-VN');
-            formData.append('timestamp', timestamp);
+            getPosition().then(function (pos) {
+                if (!pos && REQUIRE_LOCATION) {
+                    showMessage('Cần bật định vị để điểm danh. Vào Cài đặt trình duyệt, ' +
+                                'cho phép truy cập vị trí rồi bấm lại.', 'error');
+                    resetButton();
+                    return;
+                }
 
-            fetch(scriptURL, { method: 'POST', body: formData})
-                .then(response => response.json())
-                .then(data => {
-                    if(data.result === 'success') {
-                        // Thành công: Đánh dấu thiết bị đã điểm danh
-                        localStorage.setItem('attended_' + today, 'true');
+                submitBtn.textContent = 'Đang gửi...';
 
-                        // Lấy thông tin vừa điểm danh để hiển thị
-                        const classSelect = document.getElementById('classname');
-                        const className = classSelect.options[classSelect.selectedIndex].text;
-                        const studentName = document.getElementById('studentName').value.trim();
+                const formData = new FormData(form);
+                if (pos) {
+                    formData.append('lat', pos.coords.latitude);
+                    formData.append('lng', pos.coords.longitude);
+                    formData.append('acc', pos.coords.accuracy);
+                }
 
-                        localStorage.setItem('attendanceInfo_' + today, JSON.stringify({
+                const controller = new AbortController();
+                const timer = setTimeout(function () { controller.abort(); }, 25000);
+
+                return fetch(scriptURL, {
+                    method: 'POST', body: formData, signal: controller.signal
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    clearTimeout(timer);
+
+                    if (data.result === 'success') {
+                        const info = {
                             className: className,
+                            siteName: siteName,
                             studentName: studentName,
-                            mssv: mssv
-                        }));
+                            mssv: mssv,
+                            time: data.time || ''
+                        };
+                        store.set(lockKey(classCode), JSON.stringify(info));
 
-                        showMessage(
-                            "Điểm danh thành công!<br>Lớp: " + className +
-                            "<br>Họ tên: " + studentName +
-                            "<br>MSSV: " + mssv,
-                            true
-                        );
-                        showAttendanceInfo(className, studentName, mssv);
-                        
-                        // Khóa màn hình sau 3 giây
-                        setTimeout(() => {
-                            formContainer.style.display = 'none';
-                            lockScreen.style.display = 'flex';
-                        }, 3000);
-                        
+                        showMessage('Điểm danh thành công.<br>Lớp: ' + escapeHtml(className) +
+                                    '<br>Họ tên: ' + escapeHtml(studentName) +
+                                    '<br>MSSV: ' + escapeHtml(mssv) +
+                                    (data.time ? '<br>Thời gian máy chủ: ' + escapeHtml(data.time) : '') +
+                                    (data.row ? '<br>Dòng ghi nhận: ' + escapeHtml(data.row) : ''),
+                                    'success');
+                        showAttendanceInfo(info);
+                        setTimeout(function () { showScreen('lockScreen'); }, 3000);
+
+                    } else if (data.result === 'invalid_token') {
+                        showMessage('Mã QR đã hết hạn. Vui lòng quét lại mã đang hiển thị ' +
+                                    'trên màn hình lớp học.', 'warn');
+                        resetButton();
+
+                    } else if (data.result === 'out_of_range') {
+                        showMessage('Vị trí của bạn cách ' +
+                                    escapeHtml(data.campus || 'phòng học') + ' khoảng ' +
+                                    escapeHtml(data.distance) + 'm nên không được ghi nhận. ' +
+                                    'Nếu bạn đang ngồi trong lớp, hãy ra gần cửa sổ và bấm lại.', 'error');
+                        resetButton();
+
+                    } else if (data.result === 'geo_required') {
+                        showMessage('Không nhận được vị trí. Vui lòng bật định vị rồi bấm lại.', 'error');
+                        resetButton();
+
                     } else if (data.result === 'duplicate_mssv') {
-                        // Trùng MSSV trong Sheet
-                        showMessage("Lỗi: Mã số sinh viên này đã được điểm danh trước đó!", false);
-                        submitBtn.classList.remove('loading');
-                        submitBtn.textContent = 'Ghi nhận điểm danh';
-                        submitBtn.disabled = false;
-                    } else if (data.result === 'duplicate_device') {
-                        // Cùng thiết bị đã điểm danh cho một MSSV khác trong hôm nay
-                        showMessage("Lỗi: Thiết bị này đã được dùng để điểm danh cho một bạn khác hôm nay!", false);
-                        submitBtn.classList.remove('loading');
-                        submitBtn.textContent = 'Ghi nhận điểm danh';
-                        submitBtn.disabled = false;
+                        showMessage('Mã số sinh viên này đã điểm danh lớp ' +
+                                    escapeHtml(className) + ' hôm nay.', 'error');
+                        resetButton();
+
                     } else {
-                        throw new Error(data.error || "Unknown error");
+                        showMessage('Máy chủ báo lỗi: ' + escapeHtml(data.error || 'không xác định') +
+                                    '. Vui lòng báo giảng viên.', 'error');
+                        resetButton();
                     }
                 })
-                .catch(error => {
-                    console.error('Error!', error.message);
-                    showMessage("Có lỗi xảy ra kết nối hệ thống, vui lòng thử lại.", false);
-                    submitBtn.classList.remove('loading');
-                    submitBtn.textContent = 'Ghi nhận điểm danh';
-                    submitBtn.disabled = false;
+                .catch(function (error) {
+                    clearTimeout(timer);
+                    console.error(error);
+                    showMessage(error.name === 'AbortError'
+                        ? 'Mạng phản hồi quá chậm. Kiểm tra kết nối và bấm lại.'
+                        : 'Không kết nối được hệ thống. Kiểm tra mạng và bấm lại.', 'error');
+                    resetButton();
                 });
+            });
         });
-
-        function showMessage(text, isSuccess) {
-            messageDiv.innerHTML = text;
-            messageDiv.style.display = 'block';
-            messageDiv.className = isSuccess ? 'success' : 'error';
-        }
     </script>
 </body>
 </html>
