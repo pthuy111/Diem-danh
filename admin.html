@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mã QR điểm danh</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f4f7f6;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 { color: rgb(33,64,154); font-size: 26px; margin: 0 0 4px; }
+        #sub { color: #666; margin-bottom: 16px; }
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+        select {
+            font-size: 17px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+        #qrbox {
+            display: inline-block;
+            background: #fff;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.12);
+            min-height: 340px;
+            min-width: 340px;
+        }
+        #countdown { font-size: 40px; font-weight: 700; color: rgb(33,64,154); margin-top: 14px; }
+        #hint { color: #888; font-size: 14px; margin-top: 6px; }
+        #link { font-size: 11px; color: #aaa; word-break: break-all; max-width: 520px; margin: 14px auto 0; }
+        #err { color: #b00020; font-weight: 700; margin-top: 12px; min-height: 20px; }
+    </style>
+</head>
+<body>
+    <h1>ĐIỂM DANH - MÃ QR ĐỘNG</h1>
+    <div id="sub">Sinh viên quét mã trên màn hình. Mã tự đổi liên tục.</div>
+
+    <div class="controls">
+        <select id="cls"></select>
+        <select id="site"></select>
+    </div>
+
+    <div id="qrbox"><div id="qr"></div></div>
+    <div id="countdown">--</div>
+    <div id="hint">Mã hết hạn khi đếm về 0. Link gửi ra ngoài lớp sẽ không dùng được.</div>
+    <div id="link"></div>
+    <div id="err"></div>
+
+    <script>
+        /* ================== CẤU HÌNH ==================
+           Phải khớp CHÍNH XÁC với scriptURL, ADMIN_KEY, CLASSES, CAMPUSES
+           trong file Apps Script (.gs). Sửa 1 bên thì nhớ sửa bên kia.   */
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzURX2OatlYdikc95tVCBxkJ80g7Q6Hy8r3j8XrZN4Zbct93262k_Few5VP71_bDbi9/exec';
+        const ADMIN_KEY = '1984';
+
+        const CLASS_LABELS = {
+            'DHKT20C':            'DHKT20C',
+            'DHKT20C_TCTA':       'DHKT20C_TCTA',
+            'DHKT20A':            'DHKT20A',
+            'DH18TT_HL_N1':       'DH18TT_HL_N1 - Tiết 1-3',
+            'DH18TT_HL':          'DH18TT_HL - Tiết 4-6',
+            'DHQTLOG21C':         'DHQTLOG21C',
+            'DHMK21A':            'DHMK21A',
+            'DHDIGITAL21A_TCTA':  'DHDIGITAL21A_TCTA',
+            'DHDIGITAL21C_TCTA':  'DHDIGITAL21C_TCTA'
+        };
+
+        const SITE_LABELS = {
+            'NVB':  'Cơ sở Nguyễn Văn Bảo',
+            'NVD':  'Cơ sở Nguyễn Văn Dung',
+            'AUTO': 'Cơ sở gần nhất'
+        };
+
+        /* ---------- Dựng danh sách lựa chọn ---------- */
+        const clsSelect  = document.getElementById('cls');
+        const siteSelect = document.getElementById('site');
+
+        Object.keys(CLASS_LABELS).forEach(function (code) {
+            const opt = document.createElement('option');
+            opt.value = code;
+            opt.textContent = CLASS_LABELS[code];
+            clsSelect.appendChild(opt);
+        });
+
+        Object.keys(SITE_LABELS).forEach(function (code) {
+            const opt = document.createElement('option');
+            opt.value = code;
+            opt.textContent = SITE_LABELS[code];
+            siteSelect.appendChild(opt);
+        });
+
+        /* ---------- Lấy mã QR mới và đếm ngược ---------- */
+        let left = 0;
+        let timer = null;
+
+        function render(data) {
+            document.getElementById('err').textContent = '';
+            const box = document.getElementById('qr');
+            box.innerHTML = '';
+            new QRCode(box, {
+                text: data.url,
+                width: 340,
+                height: 340,
+                correctLevel: QRCode.CorrectLevel.M
+            });
+            document.getElementById('link').textContent = data.url;
+            left = data.secondsLeft;
+            tick();
+        }
+
+        function fail(message) {
+            document.getElementById('err').textContent = 'Lỗi: ' + message + '. Đang thử lại...';
+            setTimeout(refresh, 5000);
+        }
+
+        function refresh() {
+            const cls  = clsSelect.value;
+            const site = siteSelect.value;
+
+            const formData = new FormData();
+            formData.append('action', 'qrdata');
+            formData.append('key', ADMIN_KEY);
+            formData.append('c', cls);
+            formData.append('s', site);
+
+            fetch(scriptURL, { method: 'POST', body: formData })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.result === 'ok') {
+                        render(data);
+                    } else {
+                        fail(data.error || 'không xác định');
+                    }
+                })
+                .catch(function (err) {
+                    fail(err && err.message ? err.message : String(err));
+                });
+        }
+
+        function tick() {
+            clearInterval(timer);
+            timer = setInterval(function () {
+                left--;
+                document.getElementById('countdown').textContent = left > 0 ? left : '...';
+                if (left <= 0) {
+                    clearInterval(timer);
+                    refresh();
+                }
+            }, 1000);
+        }
+
+        clsSelect.addEventListener('change', refresh);
+        siteSelect.addEventListener('change', refresh);
+        refresh();
+    </script>
+</body>
+</html>
