@@ -162,7 +162,7 @@
         <div id="lockScreen" class="screen">
             <div class="icon">✅</div>
             <h2>Đã ghi nhận</h2>
-            <p>Thiết bị này đã điểm danh cho lớp học phần bên dưới.</p>
+            <p>Thiết bị này đã điểm danh cho lớp học phần.</p>
             <div id="attendanceInfo"></div>
         </div>
 
@@ -182,7 +182,7 @@
                     <input type="text" id="mssv" name="mssv" inputmode="numeric"
                            placeholder="Nhập chính xác để hệ thống ghi nhận"
                            required pattern="[0-9]{8,10}"
-                           title="Mã số sinh viên gồm 8 đến 10 chữ số">
+                           title="Mã số sinh viên gồm 8 chữ số">
                 </div>
 
                 <div class="form-group">
@@ -199,6 +199,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
     <script>
         /* ================== CẤU HÌNH ==================
            Dán Web app URL của Google Apps Script vào đây.                    */
@@ -246,6 +247,17 @@
             get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
             set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
         };
+
+        // Dấu vân tay thiết bị: tính từ đặc điểm phần cứng/phần mềm của máy,
+        // KHÔNG lưu trong localStorage nên xóa lịch sử duyệt web không xóa được.
+        // Máy chủ dùng giá trị này để chặn 1 thiết bị điểm danh cho nhiều MSSV.
+        // Tính sẵn ngay khi mở trang để lúc bấm gửi không phải chờ.
+        const visitorIdPromise = (typeof FingerprintJS !== 'undefined')
+            ? FingerprintJS.load()
+                .then(function (fp) { return fp.get(); })
+                .then(function (r) { return r.visitorId; })
+                .catch(function () { return ''; })
+            : Promise.resolve('');
 
         function escapeHtml(s) {
             return String(s).replace(/[&<>"']/g, function (c) {
@@ -361,7 +373,7 @@
             const studentName = nameInput.value;
 
             if (!/^[0-9]{8,10}$/.test(mssv)) {
-                showMessage('Mã số sinh viên phải gồm 8 đến 10 chữ số.', 'error');
+                showMessage('Mã số sinh viên phải gồm 8 chữ số.', 'error');
                 return;
             }
             if (studentName.length < 3) {
@@ -373,7 +385,10 @@
             submitBtn.disabled = true;
             messageDiv.style.display = 'none';
 
-            getPosition().then(function (pos) {
+            Promise.all([getPosition(), visitorIdPromise]).then(function (both) {
+                const pos      = both[0];
+                const deviceId = both[1];
+
                 if (!pos && REQUIRE_LOCATION) {
                     showMessage('Cần bật định vị để điểm danh. Vào Cài đặt trình duyệt, ' +
                                 'cho phép truy cập vị trí rồi bấm lại.', 'error');
@@ -389,6 +404,7 @@
                     formData.append('lng', pos.coords.longitude);
                     formData.append('acc', pos.coords.accuracy);
                 }
+                formData.append('deviceId', deviceId || '');
 
                 const controller = new AbortController();
                 const timer = setTimeout(function () { controller.abort(); }, 25000);
@@ -428,7 +444,7 @@
                         showMessage('Vị trí của bạn cách ' +
                                     escapeHtml(data.campus || 'phòng học') + ' khoảng ' +
                                     escapeHtml(data.distance) + 'm nên không được ghi nhận. ' +
-                                    'Nếu bạn đang ngồi trong lớp, hãy ra gần cửa sổ và bấm lại.', 'error');
+                                    'Nếu bạn đang ngồi trong lớp, hãy di chuyển vị trí để load GPS lại.', 'error');
                         resetButton();
 
                     } else if (data.result === 'geo_required') {
@@ -440,6 +456,12 @@
                     } else if (data.result === 'duplicate_mssv') {
                         showMessage('Mã số sinh viên này đã điểm danh lớp ' +
                                     escapeHtml(className) + ' hôm nay.', 'error');
+                        resetButton();
+
+                    } else if (data.result === 'duplicate_device') {
+                        showMessage('Thiết bị này đã được dùng để điểm danh cho MSSV ' +
+                                    escapeHtml(String(data.mssv || '')) + ' hôm nay. ' +
+                                    'Mỗi thiết bị chỉ điểm danh được cho một sinh viên.', 'error');
                         resetButton();
 
                     } else {
